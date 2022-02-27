@@ -10,24 +10,20 @@ export default class Clients extends BaseSchema {
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.enu('active_status', ['Active', 'Inactive']).defaultTo('Active')
-      table.string('firstname', 15)
-      table.string('initial', 1)
-      table.string('lastname', 15)
-      table.enu('completion_status', [
-        'Unassinged',
-        'Assinged',
-        'WorkingOn',
-        'WaitingOn',
-        'Complete',
-      ])
-      table.dateTime('dropOffDate')
+      table.enu('active_status', ['Active', 'Inactive']).defaultTo('Active').notNullable()
+      table.string('firstname', 15).notNullable()
+      table.string('initial', 1).notNullable()
+      table.string('lastname', 15).notNullable()
+      table
+        .enu('completion_status', ['Unassinged', 'Assinged', 'WorkingOn', 'WaitingOn', 'Complete'])
+        .notNullable()
+      table.date('dropOffDate').notNullable()
     })
   }
 
   public async down() {
-    this.schema.raw('DROP TYPE IF EXISTS "active_status"')
-    this.schema.raw('DROP TYPE IF EXISTS "completion_status"')
+    // this.schema.raw('DROP TYPE IF EXISTS "active_status"')
+    // this.schema.raw('DROP TYPE IF EXISTS "completion_status"')
     this.schema.dropTable(this.tableName)
   }
 }

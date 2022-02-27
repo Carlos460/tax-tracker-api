@@ -23,30 +23,47 @@ import Database from '@ioc:Adonis/Lucid/Database'
 
 import Client, { ActiveStatus, CompletionStatus } from 'App/Models/Client'
 
-Route.get('/client', async ({ response }) => {
+Route.get('/clients', async ({ response }) => {
   // Returns list of clients for the company currently authenticated
   const data = await Database.from('clients').select('*')
 
   response.send(data)
 })
 
-Route.post('/client', async ({ request, response }) => {
+Route.post('/clients', async ({ request, response }) => {
   const client = await Client.create({
-    activeStatus: ActiveStatus.Active,
+    activeStatus: ActiveStatus.Inactive,
     firstname: request.body().firstName,
     initial: request.body().initial,
     lastname: request.body().lastName,
-    completionStatus: CompletionStatus.Unassinged,
+    completionStatus: CompletionStatus.Complete,
+    droppedOffDate: request.body().dropOffDate,
   })
 
   const clientJson = client.serialize()
 
-  response.send(clientJson)
+  if (client.$isPersisted) response.send({ message: `${clientJson.firstname} was added` })
+  else response.send({ message: 'something went wrong' })
 })
 
-Route.get('/client/:id', async ({ response }) => {
-  // Returns a specific client for the company currently authenticated
+Route.delete('/clients', async ({ request, response }) => {
+  const clientIdentifier = request.body().id
 
+  const client = await Client.findBy('uniqueId', clientIdentifier)
+
+  if (client) {
+    await client.delete()
+    if (client.$isDeleted)
+      response.send({
+        message: `${client.$original.firstname} ${client.$original.initial} ${client.$original.lastname} was deleted.`,
+      })
+  } else {
+    response.send({ message: 'client was not found' })
+  }
+})
+
+Route.get('/clients/:id', async ({ response }) => {
+  // Returns a specific client for the company currently authenticated
   response.send({ message: 'hello' })
 })
 
