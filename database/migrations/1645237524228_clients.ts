@@ -16,8 +16,9 @@ export default class Clients extends BaseSchema {
       table.string('lastname', 15).notNullable()
       table
         .enu('completion_status', ['Unassinged', 'Assinged', 'WorkingOn', 'WaitingOn', 'Complete'])
+        .defaultTo('Unassinged')
         .notNullable()
-      table.date('dropOffDate').notNullable()
+      table.date('drop_off_date').notNullable()
     })
   }
 

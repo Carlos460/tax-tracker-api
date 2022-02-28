@@ -26,18 +26,22 @@ import Client, { ActiveStatus, CompletionStatus } from 'App/Models/Client'
 Route.get('/clients', async ({ response }) => {
   // Returns list of clients for the company currently authenticated
   const data = await Database.from('clients').select('*')
-
   response.send(data)
 })
 
 Route.post('/clients', async ({ request, response }) => {
+  // Find client and respond if client already exists
+  const userExist = await Client.findBy('firstname', request.body().firstName)
+  console.log(userExist?.$isPersisted)
+  if (userExist?.$isPersisted)
+    response.abort({ message: `Client ${userExist.$original.firstname} already exists` })
+
+  // Create new client
   const client = await Client.create({
-    activeStatus: ActiveStatus.Inactive,
     firstname: request.body().firstName,
     initial: request.body().initial,
     lastname: request.body().lastName,
-    completionStatus: CompletionStatus.Complete,
-    droppedOffDate: request.body().dropOffDate,
+    dropOffDate: request.body().dropOffDate,
   })
 
   const clientJson = client.serialize()
@@ -47,9 +51,9 @@ Route.post('/clients', async ({ request, response }) => {
 })
 
 Route.delete('/clients', async ({ request, response }) => {
-  const clientIdentifier = request.body().id
+  const clientIdentifier = request.body().uniqueId
 
-  const client = await Client.findBy('uniqueId', clientIdentifier)
+  const client = await Client.findBy('firstname', clientIdentifier)
 
   if (client) {
     await client.delete()

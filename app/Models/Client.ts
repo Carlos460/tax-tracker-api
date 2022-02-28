@@ -37,5 +37,5 @@ export default class Client extends BaseModel {
   public completionStatus: CompletionStatus
 
   @column.date()
-  public droppedOffDate: DateTime
+  public dropOffDate: DateTime
 }
