@@ -31,13 +31,13 @@ Route.get('/clients', async ({ response }) => {
 
 Route.post('/clients', async ({ request, response }) => {
   // Find client and respond if client already exists
-  const userExist = await Client.findBy('firstname', request.body().firstName)
-  console.log(userExist?.$isPersisted)
+  const userExist = await Client.findBy('unique_id', request.body().uniqueId)
   if (userExist?.$isPersisted)
     response.abort({ message: `Client ${userExist.$original.firstname} already exists` })
 
   // Create new client
   const client = await Client.create({
+    uniqueId: request.body().uniqueId,
     firstname: request.body().firstName,
     initial: request.body().initial,
     lastname: request.body().lastName,
@@ -53,7 +53,7 @@ Route.post('/clients', async ({ request, response }) => {
 Route.delete('/clients', async ({ request, response }) => {
   const clientIdentifier = request.body().uniqueId
 
-  const client = await Client.findBy('firstname', clientIdentifier)
+  const client = await Client.findBy('unique_id', clientIdentifier)
 
   if (client) {
     await client.delete()

@@ -21,6 +21,9 @@ export default class Client extends BaseModel {
 
   // General Info
   @column()
+  public uniqueId: number
+
+  @column()
   public activeStatus: ActiveStatus
 
   @column()

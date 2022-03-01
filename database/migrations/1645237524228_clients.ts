@@ -10,6 +10,7 @@ export default class Clients extends BaseSchema {
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
+      table.integer('unique_id').notNullable()
       table.enu('active_status', ['Active', 'Inactive']).defaultTo('Active').notNullable()
       table.string('firstname', 15).notNullable()
       table.string('initial', 1).notNullable()
