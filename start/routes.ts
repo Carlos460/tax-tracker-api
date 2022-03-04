@@ -55,20 +55,22 @@ Route.delete('/clients', async ({ request, response }) => {
 
   const client = await Client.findBy('unique_id', clientIdentifier)
 
-  if (client) {
-    await client.delete()
-    if (client.$isDeleted)
-      response.send({
+  client ? await client.delete() : response.abort({ message: 'client was not found' })
+  client?.$isDeleted
+    ? response.send({
         message: `${client.$original.firstname} ${client.$original.initial} ${client.$original.lastname} was deleted.`,
       })
-  } else {
-    response.send({ message: 'client was not found' })
-  }
+    : response.send({ message: 'somthing went wrong deleting client, try agian' })
 })
 
 Route.get('/clients/:id', async ({ response }) => {
   // Returns a specific client for the company currently authenticated
-  response.send({ message: 'hello' })
+  const client = await Client.findBy('unique_id', request.params().unique_id)
+
+  const clientJson = client?.serialize()
+
+  if (!client?.$isPersisted) response.abort({ message: 'Client does not exist' })
+  response.send(clientJson)
 })
 
 Route.get('/preparer/:id', async ({ request, response }) => {
