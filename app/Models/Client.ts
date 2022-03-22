@@ -21,7 +21,7 @@ export default class Client extends BaseModel {
 
   // General Info
   @column()
-  public uniqueId: number
+  public uniqueId: string
 
   @column()
   public activeStatus: ActiveStatus
@@ -35,6 +35,8 @@ export default class Client extends BaseModel {
   @column()
   public lastname: string
 
+  @column()
+  public ssn: string
   // Track Info
   @column()
   public completionStatus: CompletionStatus
