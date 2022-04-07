@@ -17,11 +17,11 @@ export enum CompletionStatus {
 export default class Client extends BaseModel {
   // Unique ID
   @column({ isPrimary: true })
-  public id: number
+  public key: number
 
   // General Info
   @column()
-  public uniqueId: string
+  public id: string
 
   @column()
   public activeStatus: ActiveStatus

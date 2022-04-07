@@ -5,12 +5,12 @@ export default class Clients extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('key')
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.string('unique_id').notNullable()
+      table.string('id').notNullable()
       table.enu('active_status', ['Active', 'Inactive']).defaultTo('Active').notNullable()
       table.string('firstname', 15).notNullable()
       table.string('initial', 1).notNullable()
