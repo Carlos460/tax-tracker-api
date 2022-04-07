@@ -21,8 +21,9 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 // Clients routes
-Route.get('/clients', 'ClientsController.index')
-Route.post('/clients', 'ClientsController.create')
+Route.get('/clients', 'ClientsController.get')
+Route.post('/clients', 'ClientsController.post')
+
+Route.get('/clients/:id', 'ClientsController.index')
+Route.patch('/clients', 'ClientsController.patch')
 Route.delete('/clients', 'ClientsController.delete')
-Route.get('/clients/:id', 'ClientsController.client')
-Route.post('/clients/:id', 'ClientsController.update')

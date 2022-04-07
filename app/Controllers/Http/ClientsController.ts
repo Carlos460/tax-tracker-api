@@ -1,71 +1,101 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Client from 'App/Models/Client'
 
 export default class ClientsController {
   /**
-   * Index
+   * GET Method
+   * Get an Array of the Client Object
    */
-  public async index(ctx: HttpContextContract) {
-    // Returns list of clients for the company currently authenticated
+  public async get({ response }) {
     const clients = await Client.all()
     const clientsJson = clients.map((client) => client.serialize())
-    ctx.response.send(clientsJson)
+    response.send(clientsJson)
   }
-  /**
-   * Create
-   */
-  public async create(ctx: HttpContextContract) {
-    // Find client and respond if client already exists
-    const userExist = await Client.findBy('unique_id', ctx.request.body().uniqueId)
-    if (userExist?.$isPersisted)
-      ctx.response.abort({ message: `Client ${userExist.$original.firstname} already exists` })
 
-    // Create new client
+  /**
+   * POST Method
+   * Create new Client Object
+   */
+  public async post({ request, response }) {
+    const userExist = await Client.findBy('id', request.body().id)
+
+    if (userExist?.$isPersisted)
+      response.abort({ message: `Client ${userExist.$original.firstname} already exists` })
+
     const client = await Client.create({
-      uniqueId: ctx.request.body().uniqueId,
-      firstname: ctx.request.body().firstName,
-      initial: ctx.request.body().initial,
-      lastname: ctx.request.body().lastName,
-      ssn: ctx.request.body().ssn,
-      dropOffDate: ctx.request.body().dropOffDate,
+      id: request.body().id,
+      firstname: request.body().firstName,
+      initial: request.body().initial,
+      lastname: request.body().lastName,
+      ssn: request.body().ssn,
+      dropOffDate: request.body().dropOffDate,
     })
 
     const clientJson = client.serialize()
 
-    if (client.$isPersisted) ctx.response.send({ message: `${clientJson.firstname} was added` })
-    else ctx.response.send({ message: 'something went wrong' })
+    if (client.$isPersisted) response.send({ message: `${clientJson.firstname} was added` })
+    else response.send({ message: 'something went wrong' })
   }
-  /**
-   * Delete
-   */
-  public async delete(ctx: HttpContextContract) {
-    const clientIdentifier = ctx.request.body().Id
 
-    const client = await Client.findBy('id', clientIdentifier)
-
-    client ? await client.delete() : ctx.response.abort({ message: 'client was not found' })
-    client?.$isDeleted
-      ? ctx.response.send({
-          message: `${client.$original.firstname} ${client.$original.initial} ${client.$original.lastname} was deleted.`,
-        })
-      : ctx.response.send({ message: 'somthing went wrong deleting client, try agian' })
-  }
   /**
-   * Client
+   * Get Method Index
+   * Get an Indexed Client Object
    */
-  public async client(ctx: HttpContextContract) {
-    // Returns a specific client
-    const client = await Client.findBy('id', ctx.request.params().id)
+  public async index({ request, response }) {
+    const client = await Client.findBy('id', request.params().id)
 
     const clientJson = client?.serialize()
 
-    if (!client?.$isPersisted) ctx.response.abort({ message: 'Client does not exist' })
-    ctx.response.send(clientJson)
+    if (!client?.$isPersisted) response.abort({ message: 'Client does not exist' })
+    response.send(clientJson)
   }
+
   /**
-   * Update
+   * PATCH Method
+   * Update an Indexed Client Object
    */
-  public async update(ctx: HttpContextContract) {
-    ctx.response.send({ message: ctx.request.body() })
+  public async patch({ request, response }) {
+    // check if client exists
+    const clientId = request.body().id
+    const client = await Client.findBy('id', clientId)
+
+    const newClientValues = request.body()
+
+    if (newClientValues.firstName.length !== 0)
+      client?.merge({ firstname: newClientValues.firstName })
+
+    if (newClientValues.initial.length !== 0) client?.merge({ initial: newClientValues.initial })
+
+    if (newClientValues.lastName.length !== 0) client?.merge({ lastname: newClientValues.lastName })
+
+    if (newClientValues.ssn.length !== 0) client?.merge({ ssn: newClientValues.ssn })
+
+    if (newClientValues.completionStatus.length !== 0)
+      client?.merge({ completionStatus: newClientValues.completionStatus })
+
+    if (newClientValues.dropOffDate.length !== 0)
+      client?.merge({ dropOffDate: newClientValues.dropOffDate })
+
+    client?.save()
+
+    const clientJson = client?.serialize()
+
+    response.send({ message: clientJson })
+  }
+
+  /**
+   * DELETE Method
+   * Delete an Indexed Client Object
+   */
+  public async delete({ request, response }) {
+    const clientId = request.body().id
+
+    const client = await Client.findBy('id', clientId)
+
+    client ? await client.delete() : response.abort({ message: 'client was not found' })
+    client?.$isDeleted
+      ? response.send({
+          message: `${client.$original.firstname} ${client.$original.initial} ${client.$original.lastname} was deleted.`,
+        })
+      : response.send({ message: 'somthing went wrong deleting client, try agian' })
   }
 }
