@@ -10,12 +10,11 @@ export default class Clients extends BaseSchema {
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.string('id').notNullable()
+      table.string('ssn', 9).notNullable()
       table.enu('active_status', ['Active', 'Inactive']).defaultTo('Active').notNullable()
       table.string('firstname', 15).notNullable()
       table.string('initial', 1).notNullable()
       table.string('lastname', 15).notNullable()
-      table.string('ssn', 9).notNullable()
       table
         .enu('completion_status', ['Unassinged', 'Assinged', 'WorkingOn', 'WaitingOn', 'Complete'])
         .defaultTo('Unassinged')

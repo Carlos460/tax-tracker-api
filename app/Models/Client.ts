@@ -17,7 +17,7 @@ export enum CompletionStatus {
 export default class Client extends BaseModel {
   // Unique ID
   @column({ isPrimary: true })
-  public key: number
+  public ssn: string
 
   // General Info
   @column()
@@ -35,8 +35,6 @@ export default class Client extends BaseModel {
   @column()
   public lastname: string
 
-  @column()
-  public ssn: string
   // Track Info
   @column()
   public completionStatus: CompletionStatus

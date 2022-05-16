@@ -16,24 +16,31 @@ export default class ClientsController {
    * Create new Client Object
    */
   public async post({ request, response }) {
-    const userExist = await Client.findBy('id', request.body().id)
+    // Checks duplicate ssn - returns if duplicate found
+    const userExist = await Client.findBy('ssn', request.body().ssn)
 
     if (userExist?.$isPersisted)
-      response.abort({ message: `Client ${userExist.$original.firstname} already exists` })
+      response.abort({
+        code: '202',
+        message: `Client ${userExist.$original.firstname} already exists with same ssn.`,
+      })
 
     const client = await Client.create({
-      id: request.body().id,
       firstname: request.body().firstName,
       initial: request.body().initial,
       lastname: request.body().lastName,
       ssn: request.body().ssn,
-      dropOffDate: request.body().dropOffDate,
+      dropOffDate: request.body().dropOffDate.slice(0, 10),
     })
 
     const clientJson = client.serialize()
 
-    if (client.$isPersisted) response.send({ message: `${clientJson.firstname} was added` })
-    else response.send({ message: 'something went wrong' })
+    if (client.$isPersisted)
+      response.send({
+        code: '200',
+        message: `${clientJson.firstname} ${clientJson.initial} ${clientJson.lastName} was added.`,
+      })
+    else response.send({ code: '500', message: 'Something went wrong when adding the new client.' })
   }
 
   /**
@@ -41,11 +48,11 @@ export default class ClientsController {
    * Get an Indexed Client Object
    */
   public async index({ request, response }) {
-    const client = await Client.findBy('id', request.params().id)
+    const client = await Client.findBy('id', request.params().ssn)
 
     const clientJson = client?.serialize()
 
-    if (!client?.$isPersisted) response.abort({ message: 'Client does not exist' })
+    if (!client?.$isPersisted) response.abort({ code: '404', message: 'Client does not exist,' })
     response.send(clientJson)
   }
 
@@ -55,8 +62,8 @@ export default class ClientsController {
    */
   public async patch({ request, response }) {
     // check if client exists
-    const clientId = request.body().id
-    const client = await Client.findBy('id', clientId)
+    const clientId = request.body().ssn
+    const client = await Client.findBy('ssn', clientId)
 
     const newClientValues = request.body()
 
@@ -79,7 +86,7 @@ export default class ClientsController {
 
     const clientJson = client?.serialize()
 
-    response.send({ message: clientJson })
+    response.send({ code: '200', message: 'Client was found.', data: clientJson })
   }
 
   /**
@@ -87,15 +94,20 @@ export default class ClientsController {
    * Delete an Indexed Client Object
    */
   public async delete({ request, response }) {
-    const clientId = request.body().id
+    const clientId = request.body().ssn
 
-    const client = await Client.findBy('id', clientId)
+    const client = await Client.findBy('ssn', clientId)
 
-    client ? await client.delete() : response.abort({ message: 'client was not found' })
+    client
+      ? await client.delete()
+      : response.abort({ code: '404', message: 'Client was not found.' })
     client?.$isDeleted
       ? response.send({
           message: `${client.$original.firstname} ${client.$original.initial} ${client.$original.lastname} was deleted.`,
         })
-      : response.send({ message: 'somthing went wrong deleting client, try agian' })
+      : response.send({
+          code: '500',
+          message: 'Somthing went wrong deleting client in the server, please try agian.',
+        })
   }
 }
